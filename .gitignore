@@ -1,0 +1,24 @@
+# Python and Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Logs and OS files
+*.log
+.DS_Store
+Thumbs.db
+
+# Earth Engine and HF Cache
+.ee/
+~/.huggingface/
+.cache/
+
+# User-specific Environment Variables
+.env

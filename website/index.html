@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLOF Lake Susceptibility Viewer</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #080d12;
+  --surface:   #0f1923;
+  --surface2:  #162130;
+  --surface3:  #1c2c40;
+  --border:    #1f3048;
+  --accent:    #38bdf8;
+  --accent-dim: rgba(56,189,248,0.12);
+  --text:      #dde8f5;
+  --muted:     #5a7a99;
+  --danger:    #f87171;
+  --warn:      #fb923c;
+  --ok:        #4ade80;
+}
+
+html, body { height: 100%; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--bg); overflow: hidden; }
+
+/* ─── LOADING ─────────────────────────────────────────────── */
+#loading {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 18px; transition: opacity 0.6s ease;
+}
+#loading.fade { opacity: 0; pointer-events: none; }
+#loading.gone { display: none; }
+
+.loader-icon {
+  position: relative; width: 64px; height: 64px;
+}
+.loader-ring {
+  position: absolute; inset: 0;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.85s linear infinite;
+}
+.loader-ring.ring2 {
+  inset: 10px;
+  border-top-color: transparent;
+  border-right-color: rgba(56,189,248,0.4);
+  animation-duration: 1.3s;
+  animation-direction: reverse;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem; font-weight: 700;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--accent);
+}
+#load-msg {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.7rem; color: var(--muted);
+  max-width: 300px; text-align: center;
+}
+.load-bar-bg {
+  width: 240px; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden;
+}
+.load-bar-fill {
+  height: 100%; background: var(--accent); border-radius: 1px;
+  width: 0%; transition: width 0.3s ease;
+}
+
+/* ─── LAYOUT ──────────────────────────────────────────────── */
+#app { display: flex; height: 100vh; }
+
+/* ─── SIDEBAR ─────────────────────────────────────────────── */
+#sidebar {
+  width: 298px; min-width: 298px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 1000;
+}
+#sidebar::-webkit-scrollbar { width: 3px; }
+#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Header */
+.sb-header {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+}
+.sb-header .chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.chip-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s ease infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.sb-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.3rem; font-weight: 800;
+  line-height: 1.2; color: var(--text);
+}
+.sb-header .sub {
+  margin-top: 7px; font-size: 0.72rem;
+  color: var(--muted); line-height: 1.5;
+}
+
+/* Section */
+.sb-sec {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-sec-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* Basemap buttons */
+.bm-wrap { display: flex; gap: 8px; }
+.bm-btn {
+  flex: 1; padding: 8px 10px;
+  border-radius: 7px; border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+  font-size: 0.72rem; font-family: 'DM Sans', sans-serif;
+  font-weight: 500; cursor: pointer;
+  transition: all 0.15s ease; text-align: center;
+}
+.bm-btn:hover { border-color: var(--accent); color: var(--text); }
+.bm-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent); color: var(--accent);
+}
+.bm-btn .bm-icon { font-size: 0.9rem; display: block; margin-bottom: 2px; }
+
+/* Stats grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.stat-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px;
+}
+.stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.05rem; font-weight: 500;
+  color: var(--accent); line-height: 1;
+}
+.stat-lbl { font-size: 0.62rem; color: var(--muted); margin-top: 3px; }
+
+/* Legend */
+.legend-gradient {
+  height: 10px; border-radius: 5px; margin-bottom: 6px;
+  background: linear-gradient(to right, #3b82f6, #22d3ee, #4ade80, #facc15, #f97316, #ef4444);
+}
+.legend-ticks {
+  display: flex; justify-content: space-between;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem; color: var(--muted);
+}
+.cat-rows { margin-top: 12px; display: flex; flex-direction: column; gap: 5px; }
+.cat-row {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 0.72rem; color: var(--muted);
+}
+.cat-swatch {
+  width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+}
+.cat-count {
+  margin-left: auto;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; color: var(--text);
+}
+
+/* Filter */
+.filter-wrap { display: flex; flex-direction: column; gap: 10px; }
+.range-row { display: flex; align-items: center; gap: 10px; }
+.range-lbl { font-size: 0.68rem; color: var(--muted); width: 28px; flex-shrink: 0; }
+.range-row input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 3px; border-radius: 2px;
+  background: var(--border); outline: none; cursor: pointer;
+}
+.range-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+  box-shadow: 0 0 0 2px rgba(56,189,248,0.25);
+}
+.range-display {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem; color: var(--accent); width: 32px; text-align: right;
+}
+.filter-actions { display: flex; gap: 7px; margin-top: 2px; }
+.btn-apply, .btn-reset {
+  flex: 1; padding: 7px;
+  border-radius: 6px; font-size: 0.72rem;
+  font-family: 'DM Sans', sans-serif; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-apply {
+  border: 1px solid var(--accent);
+  background: var(--accent-dim); color: var(--accent);
+}
+.btn-apply:hover { background: rgba(56,189,248,0.22); }
+.btn-reset {
+  border: 1px solid var(--border);
+  background: var(--surface2); color: var(--muted);
+}
+.btn-reset:hover { border-color: var(--muted); color: var(--text); }
+
+/* Footer */
+.sb-footer {
+  margin-top: auto; padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  font-size: 0.62rem; color: var(--muted); line-height: 1.6;
+}
+
+/* ─── MAP ─────────────────────────────────────────────────── */
+#map { flex: 1; height: 100vh; }
+
+/* Leaflet overrides */
+.leaflet-control-zoom a {
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+  border-color: var(--border) !important;
+  width: 28px !important; height: 28px !important;
+  line-height: 28px !important;
+}
+.leaflet-control-zoom a:hover { color: var(--accent) !important; }
+.leaflet-control-attribution {
+  background: rgba(8,13,18,0.75) !important;
+  color: var(--muted) !important; font-size: 0.58rem !important;
+  backdrop-filter: blur(4px);
+}
+.leaflet-control-attribution a { color: var(--accent) !important; }
+
+/* Popup */
+.leaflet-popup-content-wrapper {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6) !important;
+  color: var(--text) !important;
+  padding: 0 !important;
+}
+.leaflet-popup-tip { background: var(--surface) !important; }
+.leaflet-popup-content { margin: 0 !important; }
+
+.popup-wrap {
+  padding: 14px 16px;
+  min-width: 380px; width: 420px; max-width: 600px;
+  font-family: 'DM Sans', sans-serif;
+  resize: both;
+  overflow: auto;
+}
+.popup-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 8px 0;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+.popup-head {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.8rem; font-weight: 700;
+  color: var(--accent); margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 7px;
+}
+.popup-susc-row {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 5px;
+}
+.susc-track {
+  flex: 1; height: 5px; background: var(--border);
+  border-radius: 3px; overflow: hidden;
+}
+.susc-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.susc-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem; font-weight: 500;
+}
+.susc-label { font-size: 0.65rem; font-weight: 500; margin-bottom: 10px; }
+.popup-attrs {
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 180px; overflow-y: auto;
+  padding-top: 8px; border-top: 1px solid var(--border);
+}
+.popup-attrs::-webkit-scrollbar { width: 3px; }
+.popup-attrs::-webkit-scrollbar-thumb { background: var(--border); }
+.popup-row {
+  display: flex; justify-content: space-between;
+  gap: 8px; font-size: 0.68rem;
+}
+.popup-row .pk { color: var(--muted); flex-shrink: 0; }
+.popup-row .pv {
+  color: var(--text); text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.66rem; word-break: break-all;
+}
+
+/* Chatbot */
+#chatbot-root {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 2200;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.chat-launcher {
+  width: 58px;
+  height: 58px;
+  border: 1px solid rgba(56,189,248,0.45);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #38bdf8, #0ea5e9);
+  color: #041018;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 18px 42px rgba(0,0,0,0.45), 0 0 0 7px rgba(56,189,248,0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.chat-launcher:hover { transform: translateY(-2px); box-shadow: 0 22px 52px rgba(0,0,0,0.5), 0 0 0 9px rgba(56,189,248,0.16); }
+.chat-launcher:active { transform: translateY(0) scale(0.98); }
+.chat-launcher .chat-icon { font-size: 1.55rem; line-height: 1; }
+.chat-launcher .chat-pulse {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  top: 7px;
+  right: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 4px rgba(74,222,128,0.16);
+}
+
+.chat-panel {
+  position: absolute;
+  right: 0;
+  bottom: 76px;
+  width: min(390px, calc(100vw - 34px));
+  height: min(620px, calc(100vh - 120px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(56,189,248,0.24);
+  border-radius: 8px;
+  background: rgba(15,25,35,0.96);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.62);
+  backdrop-filter: blur(14px);
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.chat-panel.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(22,33,48,0.94), rgba(15,25,35,0.94));
+}
+.chat-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(56,189,248,0.25);
+  flex-shrink: 0;
+}
+.chat-title { min-width: 0; flex: 1; }
+.chat-title strong {
+  display: block;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.86rem;
+  line-height: 1.1;
+}
+.chat-title span {
+  display: block;
+  margin-top: 3px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.chat-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+}
+.chat-close:hover { color: var(--text); border-color: var(--accent); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.chat-msg {
+  max-width: 88%;
+  border-radius: 8px;
+  padding: 10px 11px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  word-break: break-word;
+  animation: chatIn 0.18s ease;
+}
+@keyframes chatIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.chat-msg.bot {
+  align-self: flex-start;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.chat-msg table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 0.75rem; }
+.chat-msg th, .chat-msg td { border: 1px solid var(--border); padding: 4px 8px; text-align: left; }
+.chat-msg th { background: rgba(0,0,0,0.2); color: var(--accent); }
+.chat-msg pre { background: #000; padding: 8px; border-radius: 4px; overflow-x: auto; margin: 8px 0; }
+.chat-msg code { font-family: 'IBM Plex Mono', monospace; color: #fb923c; }
+.chat-msg p { margin-bottom: 8px; }
+.chat-msg p:last-child { margin-bottom: 0; }
+.chat-msg ul, .chat-msg ol { padding-left: 20px; margin-bottom: 8px; }
+.chat-msg.user {
+  align-self: flex-end;
+  background: var(--accent-dim);
+  border: 1px solid rgba(56,189,248,0.34);
+  color: #ecfeff;
+}
+.chat-meta {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.chat-tag {
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(8,13,18,0.42);
+}
+
+.chat-status {
+  margin: 0 14px 10px;
+  padding: 9px 10px;
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 8px;
+  background: rgba(8,13,18,0.45);
+  display: none;
+}
+.chat-status.active { display: block; }
+.chat-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.chat-spinner {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+.chat-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+.chat-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--ok));
+  transition: width 0.3s ease;
+}
+.chat-steps {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.chat-step {
+  font-size: 0.58rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 6px;
+}
+.chat-step.done { color: var(--ok); border-color: rgba(74,222,128,0.35); }
+.chat-step.active { color: var(--accent); border-color: rgba(56,189,248,0.45); background: var(--accent-dim); }
+
+.chat-quick {
+  display: flex;
+  gap: 7px;
+  padding: 0 14px 12px;
+  overflow-x: auto;
+}
+.chat-quick button {
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  color: var(--muted);
+  padding: 7px 9px;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+.chat-quick button:hover { color: var(--accent); border-color: rgba(56,189,248,0.45); }
+
+.chat-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--border);
+  background: rgba(8,13,18,0.34);
+}
+.chat-input {
+  flex: 1;
+  min-height: 38px;
+  max-height: 92px;
+  resize: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  outline: none;
+  padding: 10px 11px;
+  font: 0.78rem/1.35 'DM Sans', sans-serif;
+}
+.chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
+.chat-send {
+  width: 40px;
+  height: 38px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+.chat-send:hover { background: rgba(56,189,248,0.2); }
+.chat-send:disabled, .chat-input:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  #chatbot-root { right: 14px; bottom: 14px; }
+  .chat-panel {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 84px;
+    width: auto;
+    height: min(590px, calc(100vh - 105px));
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loading">
+  <div class="loader-icon">
+    <div class="loader-ring"></div>
+    <div class="loader-ring ring2"></div>
+  </div>
+  <div class="loader-title">Glacial Lake Viewer</div>
+  <div class="load-bar-bg"><div class="load-bar-fill" id="load-bar"></div></div>
+  <div id="load-msg">Initialising…</div>
+</div>
+
+<div id="app">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+
+    <!-- Header -->
+    <div class="sb-header">
+      <div class="chip"><span class="chip-dot"></span>Live Dataset</div>
+      <h1>GLOF Lake<br>Susceptibility</h1>
+      <div class="sub">Glacial lake outburst flood risk — High Mountain Asia region</div>
+    </div>
+
+    <!-- Basemap -->
+    <div class="sb-sec">
+      <div class="sb-sec-title">Basemap</div>
+      <div class="bm-wrap">
+        <button class="bm-btn active" id="btn-osm" onclick="switchBasemap('osm')">
+          <span class="bm-icon">🗺</span>Standard
+        </button>
+        <button class="bm-btn" id="btn-sat" onclick="switchBasemap('satellite')">
+          <span class="bm-icon">🛰</span>Satellite
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sb-sec">
+      <div class="sb-sec-title">Dataset Statistics</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="s-total">—</div>
+          <div class="stat-lbl">Total Lakes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="s-visible">—</div>
+          <div class="stat-lbl">Visible</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="s-mean">—</div>
+          <div class="stat-lbl">Mean Hazard</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="s-high" style="color: #f87171">—</div>
+          <div class="stat-lbl">High Risk (≥ 0.75)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="sb-sec">
+      <div class="sb-sec-title">Hazard Scale</div>
+      <div class="legend-gradient"></div>
+      <div class="legend-ticks">
+        <span>0.0</span><span>0.25</span><span>0.5</span><span>0.75</span><span>1.0</span>
+      </div>
+      <div class="cat-rows" id="cat-rows"></div>
+    </div>
+
+    <!-- Filter -->
+    <div class="sb-sec">
+      <div class="sb-sec-title">Filter by Hazard Level</div>
+      <div class="filter-wrap">
+        <div class="range-row">
+          <span class="range-lbl">Min</span>
+          <input type="range" id="f-min" min="0" max="1" step="0.01" value="0" oninput="syncRange()">
+          <span class="range-display" id="d-min">0.00</span>
+        </div>
+        <div class="range-row">
+          <span class="range-lbl">Max</span>
+          <input type="range" id="f-max" min="0" max="1" step="0.01" value="1" oninput="syncRange()">
+          <span class="range-display" id="d-max">1.00</span>
+        </div>
+        <div class="filter-actions">
+          <button class="btn-apply" onclick="applyFilter()">Apply Filter</button>
+          <button class="btn-reset" onclick="resetFilter()">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sb-footer">
+      ⚠ Google Satellite uses unofficial tiles — local/dev use only.<br>
+      Click any lake to inspect its attributes.
+    </div>
+
+  </div>
+
+  <!-- Map -->
+  <div id="map"></div>
+</div>
+
+<!-- Chatbot -->
+<div id="chatbot-root">
+  <section class="chat-panel" id="chat-panel" aria-label="GLOF assistant" aria-hidden="true">
+    <div class="chat-head">
+      <div class="chat-mark" aria-hidden="true">&#128172;</div>
+      <div class="chat-title">
+        <strong>GLOF Assistant</strong>
+        <span id="chat-route-label">GraphRAG ready</span>
+      </div>
+      <button class="chat-close" id="chat-close" type="button" aria-label="Close chat">x</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages" aria-live="polite">
+      <div class="chat-msg bot">
+        GLOF assistant ready. Ask about lake risk, KG relations, nearby lakes, or forecast probability for a GLAKE_ID.
+      </div>
+    </div>
+
+    <div class="chat-status" id="chat-status" aria-live="polite">
+      <div class="chat-status-row">
+        <span class="chat-spinner" aria-hidden="true"></span>
+        <span id="chat-status-text">Working...</span>
+      </div>
+      <div class="chat-progress"><div class="chat-progress-fill" id="chat-progress-fill"></div></div>
+      <div class="chat-steps" id="chat-steps"></div>
+    </div>
+
+    <!-- <div class="chat-quick" aria-label="Suggested questions">
+      <button type="button" data-chat-prompt="What are the main GLOF triggers?">Triggers</button>
+      <button type="button" data-chat-prompt="List top 4 high susceptibility lakes">High risk lakes</button>
+      <button type="button" data-chat-prompt="Predict GLOF probability for GL_11">Forecast GL_11</button>
+    </div> -->
+
+    <form class="chat-form" id="chat-form">
+      <textarea class="chat-input" id="chat-input" rows="1" placeholder="Ask the assistant..." autocomplete="off"></textarea>
+      <button class="chat-send" id="chat-send" type="submit" aria-label="Send message">&#10148;</button>
+    </form>
+  </section>
+
+  <button class="chat-launcher" id="chat-toggle" type="button" aria-label="Open GLOF assistant" aria-expanded="false">
+    <span class="chat-icon" aria-hidden="true">&#128172;</span>
+    <span class="chat-pulse" aria-hidden="true"></span>
+  </button>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  CONFIGURATION  ← edit these to match your setup
+// ══════════════════════════════════════════════════════════════
+const CSV_PATH   = 'trial_1064_full_dataset_susceptibility_wgs84.csv';      // path relative to this HTML file
+const GEOM_COL   = 'geometry';         // WKT geometry column
+const SUSC_COL   = 'Hazard_prob';   // susceptibility column
+
+// ══════════════════════════════════════════════════════════════
+//  COLOR SCALE  (blue → cyan → green → yellow → orange → red)
+// ══════════════════════════════════════════════════════════════
+const STOPS = [
+  [0.00, [59,  130, 246]],
+  [0.20, [34,  211, 238]],
+  [0.40, [74,  222, 128]],
+  [0.60, [250, 204,  21]],
+  [0.80, [249, 115,  22]],
+  [1.00, [239,  68,  68]],
+];
+
+function getColor(v) {
+  v = isNaN(v) ? 0 : Math.max(0, Math.min(1, v));
+  for (let i = 0; i < STOPS.length - 1; i++) {
+    const [t0, c0] = STOPS[i], [t1, c1] = STOPS[i + 1];
+    if (v >= t0 && v <= t1) {
+      const t = (v - t0) / (t1 - t0);
+      return `rgb(${~~(c0[0]+(c1[0]-c0[0])*t)},${~~(c0[1]+(c1[1]-c0[1])*t)},${~~(c0[2]+(c1[2]-c0[2])*t)})`;
+    }
+  }
+  return 'rgb(239,68,68)';
+}
+
+function suscLabel(v) {
+  if (isNaN(v) || v === null) return { text: 'Unknown', color: '#5a7a99' };
+  if (v < 0.25)  return { text: 'Low Hazard',         color: '#3b82f6' };
+  if (v < 0.50)  return { text: 'Medium-Low Hazard',  color: '#22d3ee' };
+  if (v < 0.75)  return { text: 'Medium-High Hazard', color: '#f59e0b' };
+  return              { text: 'High Hazard',          color: '#ef4444' };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MINIMAL WKT → GEOJSON PARSER
+// ══════════════════════════════════════════════════════════════
+function parseCoord(s) {
+  const p = s.trim().split(/\s+/);
+  return [parseFloat(p[0]), parseFloat(p[1])];
+}
+function parseRing(s) {
+  return s.trim().replace(/^\(|\)$/g, '').split(',').map(parseCoord);
+}
+function wktToGeoJSON(wkt) {
+  wkt = wkt.trim();
+  const up = wkt.toUpperCase();
+  if (up.startsWith('MULTIPOLYGON')) {
+    const body = wkt.slice(wkt.indexOf('('));
+    const polys = [];
+    const polyRe = /\((\s*\([^()]+\)\s*,?\s*)+\)/g;
+    let pm;
+    while ((pm = polyRe.exec(body)) !== null) {
+      const rings = [];
+      const ringRe = /\([^()]+\)/g;
+      let rm;
+      while ((rm = ringRe.exec(pm[0])) !== null) rings.push(parseRing(rm[0]));
+      if (rings.length) polys.push(rings);
+    }
+    return { type: 'MultiPolygon', coordinates: polys };
+  }
+  if (up.startsWith('POLYGON')) {
+    const body = wkt.slice(wkt.indexOf('('));
+    const rings = [];
+    const re = /\([^()]+\)/g;
+    let m;
+    while ((m = re.exec(body)) !== null) rings.push(parseRing(m[0]));
+    return { type: 'Polygon', coordinates: rings };
+  }
+  if (up.startsWith('POINT')) {
+    const inner = wkt.replace(/^POINT\s*\(/, '').replace(/\)\s*$/, '');
+    return { type: 'Point', coordinates: parseCoord(inner) };
+  }
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAP SETUP
+// ══════════════════════════════════════════════════════════════
+const renderer = L.canvas({ padding: 0.5 });
+
+const map = L.map('map', {
+  center: [33, 80], zoom: 5,
+  renderer,
+  zoomControl: true,
+  attributionControl: true,
+});
+
+const osmLayer = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  { attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> contributors', maxZoom: 19 }
+);
+
+const satLayer = L.tileLayer(
+  'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+  {
+    subdomains: ['0','1','2','3'],
+    attribution: 'Imagery © Google',
+    maxZoom: 20,
+  }
+);
+
+osmLayer.addTo(map);
+
+function switchBasemap(type) {
+  if (type === 'osm') {
+    map.removeLayer(satLayer);
+    osmLayer.addTo(map);
+    if (lakeLayer) lakeLayer.bringToFront();
+    document.getElementById('btn-osm').classList.add('active');
+    document.getElementById('btn-sat').classList.remove('active');
+  } else {
+    map.removeLayer(osmLayer);
+    satLayer.addTo(map);
+    if (lakeLayer) lakeLayer.bringToFront();
+    document.getElementById('btn-sat').classList.add('active');
+    document.getElementById('btn-osm').classList.remove('active');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════════
+let allFeatures = [];
+let lakeLayer   = null;
+
+function loadData() {
+  progress('Fetching ' + CSV_PATH + ' …', 5);
+  Papa.parse(CSV_PATH, {
+    download:        true,
+    header:          true,
+    skipEmptyLines:  true,
+    complete(res) {
+      progress(`Parsed ${res.data.length.toLocaleString()} rows. Converting geometries…`, 25);
+      // Defer so the DOM can repaint the progress bar
+      setTimeout(() => processRows(res.data), 30);
+    },
+    error(err) { progress('Error loading CSV: ' + err.message, 0); }
+  });
+}
+
+function processRows(rows) {
+  const features = [];
+  let skip = 0;
+
+  // Case-insensitive column lookup
+  const keys = Object.keys(rows[0] || {});
+  const geomKey = keys.find(k => k.toLowerCase() === GEOM_COL.toLowerCase()) || GEOM_COL;
+  
+  // Try 'hazard_prob' first, then fallback to 'hazard' or 'susceptibility'
+  let suscKey = keys.find(k => k.toLowerCase() === 'hazard_prob') || 
+                keys.find(k => k.toLowerCase() === 'hazard') || 
+                keys.find(k => k.toLowerCase() === 'susceptibility') || SUSC_COL;
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const wkt = row[geomKey];
+    if (!wkt) { skip++; continue; }
+    try {
+      const geom = wktToGeoJSON(wkt);
+      if (!geom) { skip++; continue; }
+      const props = {};
+      for (const k of keys) if (k !== geomKey) props[k] = row[k];
+      
+      // Ensure the chosen key maps to SUSC_COL so the rest of the code works
+      props[SUSC_COL] = row[suscKey];
+      
+      features.push({ type: 'Feature', geometry: geom, properties: props });
+    } catch (_) { skip++; }
+  }
+
+  progress(`Rendering ${features.length.toLocaleString()} lakes…`, 70);
+  allFeatures = features;
+
+  setTimeout(() => {
+    renderLayer(features, true);
+    updateStats(features, SUSC_COL);
+    buildCatRows(features, SUSC_COL);
+    hideLoading();
+  }, 30);
+}
+
+// ── Render ──────────────────────────────────────────────────
+function lakeStyle(feature) {
+  const v = parseFloat(feature.properties[SUSC_COL]);
+  const c = getColor(v);
+  return {
+    fillColor:   c,
+    fillOpacity: 0.72,
+    color:       c,
+    weight:      0.6,
+    opacity:     1,
+  };
+}
+
+function renderLayer(features, fit) {
+  if (lakeLayer) map.removeLayer(lakeLayer);
+
+  lakeLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
+    renderer,
+    style: lakeStyle,
+    onEachFeature(feature, layer) {
+      layer.on({
+        click(e)     { openPopup(feature.properties, e.latlng); },
+        mouseover(e) { this.setStyle({ fillOpacity: 1, weight: 1.5 }); },
+        mouseout()   { lakeLayer.resetStyle(this); },
+      });
+    },
+  });
+
+  lakeLayer.addTo(map);
+
+  if (fit && features.length) {
+    try { map.fitBounds(lakeLayer.getBounds(), { padding: [24, 24] }); } catch (_) {}
+  }
+
+  document.getElementById('s-visible').textContent = features.length.toLocaleString();
+}
+
+// ── Popup ────────────────────────────────────────────────────
+function openPopup(props, latlng) {
+  const raw  = parseFloat(props[SUSC_COL]);
+  const v    = isNaN(raw) ? 0 : raw;
+  const c    = getColor(v);
+  const lbl  = suscLabel(raw);
+
+  // Build attribute rows (exclude the susceptibility col)
+  const skipKeys = new Set([SUSC_COL, SUSC_COL.toLowerCase()]);
+  let rows = '';
+  for (const [k, val] of Object.entries(props)) {
+    if (skipKeys.has(k.toLowerCase()) || val === '' || val == null) continue;
+    const disp = String(val).length > 28 ? String(val).slice(0, 28) + '…' : val;
+    rows += `<div class="popup-row"><span class="pk">${k}</span><span class="pv">${disp}</span></div>`;
+  }
+
+  const html = `
+    <div class="popup-wrap">
+      <div class="popup-tabs">
+        <button class="tab-btn active" onclick="document.getElementById('tab-details').style.display='block'; document.getElementById('tab-weather').style.display='none'; this.classList.add('active'); this.nextElementSibling.classList.remove('active');">🏔 Lake Details</button>
+        <button class="tab-btn" onclick="document.getElementById('tab-details').style.display='none'; document.getElementById('tab-weather').style.display='block'; this.classList.add('active'); this.previousElementSibling.classList.remove('active');">🌦 Live Weather</button>
+      </div>
+      
+      <div id="tab-details" style="display:block;">
+        <div class="popup-susc-row">
+          <div class="susc-track">
+            <div class="susc-fill" style="width:${(v*100).toFixed(1)}%;background:${c}"></div>
+          </div>
+          <span class="susc-num" style="color:${c}">${isNaN(raw)?'N/A':raw.toFixed(4)}</span>
+        </div>
+        <div class="susc-label" style="color:${lbl.color}">${lbl.text}</div>
+        ${rows ? `<div class="popup-attrs">${rows}</div>` : ''}
+      </div>
+
+      <div id="tab-weather" style="display:none;">
+        <div id="weather-chart" style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;"><span style="color:var(--muted); font-size: 0.7rem;">Loading live weather...</span></div>
+      </div>
+    </div>`;
+
+  L.popup({ maxWidth: 600, minWidth: 380, closeButton: true })
+    .setLatLng(latlng)
+    .setContent(html)
+    .openOn(map);
+
+  fetchAndDrawChart(latlng.lat, latlng.lng);
+}
+
+function fetchAndDrawChart(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation,snowfall,surface_pressure&past_days=3&forecast_days=1`;
+  
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      const container = document.getElementById('weather-chart');
+      if (!container) return;
+      container.innerHTML = ''; // clear loading text
+
+      var options = {
+        series: [
+          { name: 'Temperature (°C)', type: 'line', data: data.hourly.temperature_2m },
+          { name: 'Precipitation (mm)', type: 'area', data: data.hourly.precipitation },
+          { name: 'Snowfall (cm)', type: 'area', data: data.hourly.snowfall },
+          { name: 'Pressure (hPa)', type: 'line', data: data.hourly.surface_pressure }
+        ],
+        chart: {
+          height: 260,
+          type: 'line',
+          toolbar: { show: false },
+          background: 'transparent',
+          fontFamily: 'DM Sans, sans-serif',
+          animations: { enabled: true, easing: 'easeinout', speed: 800 },
+          parentHeightOffset: 0
+        },
+        colors: ['#facc15', '#38bdf8', '#e2e8f0', '#a855f7'],
+        stroke: { curve: 'smooth', width: [3, 0, 0, 2] },
+        fill: { type: 'solid', opacity: [1, 0.25, 0.4, 1] },
+        xaxis: {
+          categories: data.hourly.time,
+          type: 'datetime',
+          labels: { style: { colors: '#5a7a99', fontSize: '10px' }, datetimeUTC: false, offsetY: -5 },
+          axisBorder: { show: false },
+          axisTicks: { show: false },
+          tooltip: { enabled: false }
+        },
+        yaxis: [
+          { show: false },
+          { show: false },
+          { show: false },
+          { show: false }
+        ],
+        theme: { mode: 'dark' },
+        grid: { 
+          borderColor: '#1f3048', 
+          strokeDashArray: 4, 
+          xaxis: { lines: { show: true } }, 
+          yaxis: { lines: { show: false } },
+          padding: { top: 0, right: 0, bottom: 0, left: 10 }
+        },
+        legend: { show: true, fontSize: '10px', markers: { width: 8, height: 8 }, itemMargin: { horizontal: 5, vertical: 0 } },
+        tooltip: {
+          theme: 'dark',
+          x: { format: 'dd MMM HH:mm' },
+          style: { fontSize: '11px' }
+        }
+      };
+
+      var chart = new ApexCharts(container, options);
+      chart.render();
+      
+      // Re-render chart to fix dimensions when tab is clicked
+      const weatherTabBtn = document.querySelectorAll('.tab-btn')[1];
+      if (weatherTabBtn) {
+        weatherTabBtn.addEventListener('click', () => {
+          setTimeout(() => { chart.windowResize(); }, 50);
+        });
+      }
+    })
+    .catch(err => {
+      const container = document.getElementById('weather-chart');
+      if (container) container.innerHTML = '<span style="color:#ef4444; font-size:0.7rem;">Failed to load weather</span>';
+    });
+}
+
+// ── Stats panel ─────────────────────────────────────────────
+function updateStats(features, suscKey) {
+  const col = suscKey || SUSC_COL;
+  const vals = features.map(f => parseFloat(f.properties[col])).filter(v => !isNaN(v));
+  const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : NaN;
+  const high = vals.filter(v => v >= 0.75).length;
+
+  document.getElementById('s-total').textContent   = allFeatures.length.toLocaleString();
+  document.getElementById('s-visible').textContent = features.length.toLocaleString();
+  document.getElementById('s-mean').textContent    = isNaN(mean) ? 'N/A' : mean.toFixed(3);
+  document.getElementById('s-high').textContent    = high.toLocaleString();
+}
+
+function buildCatRows(features, suscKey) {
+  const col = suscKey || SUSC_COL;
+  const cats = [
+    { lbl: 'Low  (< 0.25)',       r: [0,    0.25], c: '#3b82f6' },
+    { lbl: 'Med-Low  (0.25–0.5)', r: [0.25, 0.50], c: '#22d3ee' },
+    { lbl: 'Med-High (0.5–0.75)', r: [0.50, 0.75], c: '#f59e0b' },
+    { lbl: 'High  (≥ 0.75)',      r: [0.75, 1.01], c: '#ef4444' },
+  ];
+  document.getElementById('cat-rows').innerHTML = cats.map(cat => {
+    const n = features.filter(f => {
+      const v = parseFloat(f.properties[col]);
+      return !isNaN(v) && v >= cat.r[0] && v < cat.r[1];
+    }).length;
+    return `<div class="cat-row">
+      <div class="cat-swatch" style="background:${cat.c}"></div>
+      <span>${cat.lbl}</span>
+      <span class="cat-count">${n.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Filter ───────────────────────────────────────────────────
+function syncRange() {
+  const mn = parseFloat(document.getElementById('f-min').value);
+  const mx = parseFloat(document.getElementById('f-max').value);
+  document.getElementById('d-min').textContent = mn.toFixed(2);
+  document.getElementById('d-max').textContent = mx.toFixed(2);
+}
+
+function applyFilter() {
+  const mn = parseFloat(document.getElementById('f-min').value);
+  const mx = parseFloat(document.getElementById('f-max').value);
+  const filtered = allFeatures.filter(f => {
+    const v = parseFloat(f.properties[SUSC_COL]);
+    return !isNaN(v) && v >= mn && v <= mx;
+  });
+  renderLayer(filtered, false);
+  updateStats(filtered);
+}
+
+function resetFilter() {
+  document.getElementById('f-min').value = 0;
+  document.getElementById('f-max').value = 1;
+  syncRange();
+  renderLayer(allFeatures, false);
+  updateStats(allFeatures);
+}
+
+// ── Loading UI ───────────────────────────────────────────────
+function progress(msg, pct) {
+  document.getElementById('load-msg').textContent = msg;
+  if (pct !== undefined)
+    document.getElementById('load-bar').style.width = pct + '%';
+}
+
+function hideLoading() {
+  progress('Done!', 100);
+  setTimeout(() => {
+    const el = document.getElementById('loading');
+    el.classList.add('fade');
+    setTimeout(() => el.classList.add('gone'), 700);
+  }, 400);
+}
+
+// ── Boot ─────────────────────────────────────────────────────
+// Chatbot UI
+const CHAT_API_URL = window.location.protocol === 'file:'
+  ? 'http://127.0.0.1:8000/api/chat'
+  : '/api/chat';
+
+const chatPanel = document.getElementById('chat-panel');
+const chatToggle = document.getElementById('chat-toggle');
+const chatClose = document.getElementById('chat-close');
+const chatMessages = document.getElementById('chat-messages');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatSend = document.getElementById('chat-send');
+const chatStatus = document.getElementById('chat-status');
+const chatStatusText = document.getElementById('chat-status-text');
+const chatProgressFill = document.getElementById('chat-progress-fill');
+const chatSteps = document.getElementById('chat-steps');
+const chatRouteLabel = document.getElementById('chat-route-label');
+
+let chatBusy = false;
+let chatProgressTimer = null;
+
+function toggleChat(forceOpen) {
+  const open = typeof forceOpen === 'boolean' ? forceOpen : !chatPanel.classList.contains('open');
+  chatPanel.classList.toggle('open', open);
+  chatPanel.setAttribute('aria-hidden', open ? 'false' : 'true');
+  chatToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  chatToggle.setAttribute('aria-label', open ? 'Close GLOF assistant' : 'Open GLOF assistant');
+  if (open) setTimeout(() => chatInput.focus(), 120);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatChatText(value) {
+  return escapeHtml(value).replace(/\n/g, '<br>');
+}
+
+function appendChatMessage(role, text, meta) {
+  const msg = document.createElement('div');
+  msg.className = `chat-msg ${role}`;
+  
+  if (role === 'bot' && typeof marked !== 'undefined') {
+    msg.innerHTML = marked.parse(text);
+  } else {
+    msg.innerHTML = formatChatText(text);
+  }
+
+  if (meta && meta.length) {
+    const metaRow = document.createElement('div');
+    metaRow.className = 'chat-meta';
+    metaRow.innerHTML = meta.map(item => `<span class="chat-tag">${escapeHtml(item)}</span>`).join('');
+    msg.appendChild(metaRow);
+  }
+
+  chatMessages.appendChild(msg);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function startChatProgress() {
+  let tick = 0;
+  clearInterval(chatProgressTimer);
+  chatStatus.classList.add('active');
+  chatRouteLabel.textContent = `Agentic RAG`;
+  chatSteps.innerHTML = ''; // Remove the fake steps
+
+  const draw = () => {
+    // Non-linear fake progress creeping up to 95%
+    const pct = Math.min(95, 15 + tick * 4 + Math.sin(tick) * 5);
+    chatStatusText.textContent = 'Agent is reasoning...';
+    chatProgressFill.style.width = pct + '%';
+    tick += 1;
+  };
+
+  draw();
+  chatProgressTimer = setInterval(draw, 1000);
+}
+
+function finishChatProgress() {
+  clearInterval(chatProgressTimer);
+  chatStatusText.textContent = 'Answer ready';
+  chatProgressFill.style.width = '100%';
+  setTimeout(() => chatStatus.classList.remove('active'), 750);
+}
+
+function setChatBusy(isBusy) {
+  chatBusy = isBusy;
+  chatInput.disabled = isBusy;
+  chatSend.disabled = isBusy;
+}
+
+async function sendChatQuestion(question) {
+  if (!question || chatBusy) return;
+  toggleChat(true);
+  appendChatMessage('user', question);
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+
+  setChatBusy(true);
+  startChatProgress();
+
+  try {
+    const res = await fetch(CHAT_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, route: 'auto' }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) throw new Error(data.error || `Request failed (${res.status})`);
+
+    finishChatProgress();
+    const meta = [`route: ${data.route || 'agentic'}`];
+    if (data.vector_evidence && data.vector_evidence.length) meta.push(`${data.vector_evidence.length} sources`);
+    if (data.has_kg_context) meta.push('KG');
+    if (data.has_forecast_context) meta.push('forecast');
+    appendChatMessage('bot', data.answer || 'No answer returned.', meta);
+    chatRouteLabel.textContent = 'GraphRAG ready';
+  } catch (err) {
+    finishChatProgress();
+    appendChatMessage(
+      'bot',
+      `I could not reach the chatbot service.\n\nStart it with: python chatbot/chat_server.py\nThen open: http://127.0.0.1:8000/\n\nDetails: ${err.message}`
+    );
+    chatRouteLabel.textContent = 'Service offline';
+  } finally {
+    setChatBusy(false);
+  }
+}
+
+chatToggle.addEventListener('click', () => toggleChat());
+chatClose.addEventListener('click', () => toggleChat(false));
+
+chatForm.addEventListener('submit', event => {
+  event.preventDefault();
+  sendChatQuestion(chatInput.value.trim());
+});
+
+chatInput.addEventListener('keydown', event => {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    chatForm.requestSubmit();
+  }
+});
+
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto';
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 92) + 'px';
+});
+
+document.querySelectorAll('[data-chat-prompt]').forEach(button => {
+  button.addEventListener('click', () => sendChatQuestion(button.dataset.chatPrompt));
+});
+
+loadData();
+</script>
+</body>
+</html>

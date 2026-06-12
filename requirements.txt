@@ -1,0 +1,39 @@
+# Server
+fastapi
+uvicorn
+pydantic
+
+# Core Data & ML
+numpy
+pandas
+scikit-learn
+joblib
+
+# Neural Networks & Vision
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.10.0+cpu
+torchvision==0.25.0+cpu
+segmentation-models-pytorch==0.5.0
+torch-geometric==2.7.0
+torch-geometric-temporal==0.56.2
+
+# XGBoost & Explainability
+xgboost
+shap
+
+# Geospatial & Earth Engine
+geopandas
+shapely
+rasterio
+earthengine-api
+duckdb
+
+# Agentic RAG
+faiss-cpu
+huggingface_hub
+python-dotenv
+rank-bm25
+rdflib
+networkx
+pyoxigraph
+requests

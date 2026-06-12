@@ -1,0 +1,128 @@
+
+
+## Author(s):
+
+By Christian Huggel, Alejo Cochachin, Fabian Drenkhan, Javier Fluixá-Sanmartín, Holger Frey, Javier García Hernández, Christine Jurt, Randy Muñoz, Karen Price, Luis Vicuña
+
+Image /page/0/Picture/16 description: A wide-angle photograph of a majestic mountain landscape. In the background, a large, snow-covered mountain peak with glaciers reaches up into a blue sky with white clouds. Below the mountain, a vibrant turquoise alpine lake sits in a rocky basin, surrounded by steep, rugged cliffs. The foreground is a rocky slope with numerous large boulders and some sparse vegetation, offering a high vantage point looking down towards the lake.
+
+Image /page/0/Picture/17 description: An icon of an image file, depicting a green landscape, is shown to the left of the text 'Site location' in a dark sans-serif font on a white background.
+
+Site location: a) Peru, b) Cordillera Blanca and c) the Hualcán-Carhuaz area (in dashed line).
+
+Glacier shrinkage – accelerated over the last decades due to climate change – is exposing large areas in mountain regions worldwide. But an even dire consequence of the melting ice is the
+
+forming of more glacier lakes, which are increasing in size. Glacial lakes have caused some of the world's most devastating floods, for example, in the Andes, Himalayas and Alps, where thousands of human lives were lost and huge infrastructure damages reported (Carrivick and Tweed, 2013; Bajracharya et al., 2007; Carey 2005). Climate change is rapidly reshaping living conditions in high mountains – altering flood patterns and creating new flood hazards – leaving populations at imminent risk in several regions (Cook et al., 2016; Emmer et al., 2015; Frey et al., 2016; Drenkhan e al., 2019).
+
+Climatic, glaciological and hydrological information and services can play an essential role for early detection of potential hazards and risks, and for effectively reducing risks. However, infrastructure for climate and associated services are poorly developed in many high mountain areas and need to be substantially strengthened. This report on the design, implementation, operation and circumstances around the setting up of an early warning system for glacier lake outburst floods (GLOFs) in the Peruvian Andes highlights the challenges related to accessing and installing equipment in many high mountains regions.
+
+## Laguna 513 disaster
+
+Image /page/1/Picture/5 description: An overview map displaying a mountainous region with a red line tracing the path of an event. The map features a large aerial view and a smaller, inset close-up view. The inset, outlined in a blue box, shows a snow-covered mountain labeled "Mt. Hualcán" and a turquoise lake labeled "Laguna 513". A red oval on the mountain peak is marked as the "Detachment area (11 Apr 2010)". The red line on the main map originates from this detachment area, flows down the mountain, and follows a valley path towards a town labeled "Carhuaz" and the "Santa River". A scale bar at the bottom right indicates a distance of 2 kilometers, and a north arrow is present for orientation.
+
+Overview map of Lake 513 and Carhuaz, indicating the 2010 ice avalanche source zone producing the GLOF that reached down to Carhuaz.
+
+The Cordillera Blanca in the tropical Andes of Peru is a glaciated mountain range with a long history of disastrous GLOF events (Carey 2005; 2010). GLOF risks result from considerable physical hazard levels and the high levels of vulnerability and exposure of downstream populations (Frey et al., 2018). The Laguna 513 glacier lake (9°12'45"S, 77°33'00"W) is located at 4 428 metres (m) above sea level at the foot of Mount Hualcán (6 104 m) in the Santa River basin (Figs. 1, 2). The lake, which formed in the late 1960s as a result of glacier shrinkage, was declared highly dangerous in 1988 and subjected to exhaustive security works to artificially lower its level by some 20 m until 1994. This did not reduce GLOFs risk to zero, though the probability of occurrence and magnitude of GLOFs was substantially lowered. In 2004, authorities and specialists produced a report indicating that the lake could be considered safe due to the infrastructure in place (INDECI 2004; Muñoz et al. 2016).
+
+However, Laguna 513 was heavily impacted when a 450 000 cubic metres (m3) rock-ice avalanche detached from the southwest slope of Mt. Hualcán (Carey et al., 2012) (Fig. 2) on 11 April 2010, at about 8 a.m. local time. The avalanche caused a tsunami-like push-wave on the lake, resulting in a dam spillover despite the over 20 m freeboard. Traces of the wave indicate an overtopping of the dam by about 5 m – corresponding to a wave height of about 24 to 25 m – with a peak discharge of rate of several tens of thousands m3 per second (Schneider et al., 2014). The resulting GLOF damaged several bridges, water service infrastructure along its trajectory and eventually reached the debris fan of the city of Carhuaz (about 20 000 inhabitants), where the coarse material of the GLOF was deposited. A total of 0.7 km2 of agricultural land was buried and the Santa Valley highway was affected, but no lives were lost.
+
+Local and national authorities, as well as Peruvian and international experts, met in the weeks following the disaster to discuss ways to better protect people and their assets in future incidents. As a result, plans for a GLOF Early Warning System (EWS) were initiated in 2011 and implemented within three years. The GLOF EWS, the first in the Andean region, was established in the framework of the Glacier Project (<a href="www.proyectoglaciares.pe">www.proyectoglaciares.pe</a>) with financial support from the Swiss Agency for Development and Cooperation (SDC). CARE Peru and the University of Zurich jointly implemented the EWS in close collaboration with the municipality of Carhuaz and the National Water Authority of Peru (ANA) and its Office for Glacier and Lake Evaluations (former Glaciology and Water Resources Unit - UGRH) in Huaraz.
+
+## **Development and implementation of a GLOF Early Warning System**
+
+The design, organization and operation of the GLOF was structured to adhere to internationally recognized EWS components (cf. Fluixá-Sanmartín et al., 2018):
+
+- risk knowledge
+- monitoring and warning
+- · dissemination and communication
+- response capability.
+
+### Risk knowledge
+
+Understanding the risks encountered at a particular location is fundamental for the design of an EWS. Risks can be assessed using established methods that analyze physical hazards by means of critical indicators and thresholds (in this case related to the different components involved in the GLOF process), exposure of people and assets (e.g. infrastructure) and the vulnerability (e.g. social, economic) of the elements at risk. Comprehensive risk assessments for GLOFs are rare (Allen et al., 2016) and complex because GLOFs are typically the results of a cascade of triggering and propagating mass flow processes (Schneider et al., 2014; Westoby et al., 2014).
+
+The 2010 GLOF served as a reference to analyze the physical hazards by simulating the process cascade with an iterative approach of coupled, physically-based numerical mass movement and hydrodynamic models (RAMMS and IBER). This model chain was then used to simulate three potential future scenarios of different magnitudes (small, medium, large) and corresponding probabilities of occurrence (high, medium, low, respectively). This hazard assessment procedure followed international standards and was in line with the recently established guidelines of the International Commission on Glacier and Permafrost Hazards in Mountains (www.gaphaz.org), a joint commission of the International Association of Cryopsheric Sciences (IACS) and the International Permafrost Association (IPA). The modelling, together with field surveys, resulted in a GLOF hazard map for local communities and city of Carhuaz (Schneider et al., 2014) (Fig. 3). Exposure and vulnerability were assessed using publicly available data sources (such as census data) and additional surveys in the catchments.
+
+However, risks are perceived in very different ways by different actors. It is a challenge to understand and take these differences in perception into consideration but this is essential for wide user acceptance and the long term success of risk reduction measures. Repeated workshops were conducted in the different communities of the catchment to learn about the risk perceptions and priorities of local leaders and people. At a later stage, ethnographic studies, which included longer (several months) research visits with the local communities, were also conducted in the catchment. These were important to gain more in-depth understanding of how local people perceive their natural environment, and the relationships they maintain with mountains, glaciers and lakes that surround them. This led to a deeper understanding of how they perceived the diverse types of risks and how they understood the connections between those risks and those involved in the GLOF EWS project. Thereby cultural and political aspects were highlighted and people's concerns about water came to the fore, that is water availability, mostly in terms of access to water (e.g. water rights, allocation).
+
+### Monitoring and warning
+
+Image /page/3/Picture/5 description: A generic image file icon, which depicts a landscape with a green hill and a cloud, is shown next to the text "Glacier Lake" in a dark gray sans-serif font on a white background.
+
+Monitoring and warning are central elements of an EWS. Monitoring instruments and technical measuring must be set up to detect hazards so that timely warnings can be issued. The challenge is to identify the environmental processes and variables that are critical to the early detection of an extreme event (such as a GLOF) – and that are measurable by sensors. The insights and improved understanding of the processes gained from the reconstruction of the 2010 outburst and the modelling of potential future scenarios (risk knowledge element) served to identify where and what to measure and monitor. Knowledge about GLOF travel times – from triggering to reaching population centres – are, for instance, critical for the design of an EWS and for later visualization and planning with local authorities and communities (see "Dissemination and communication").
+
+Reference projects for GLOF EWS were rare at the time of the design for Laguna 513 (2011/2012), and completely non-existent for the Latin American region. The "art" in such a design is in taking account of all possible flood trigger processes while measuring the point that still allows for timely warning. The different types of flood trigger processes – ice avalanches, moraine instabilities, rock slope failures – strongly depend on local conditions. It is critical to adequately understand the physical environment and interplay of processes that can result in different GLOF scenarios.
+
+The harsh, extreme physical environment in which glacier lakes (as origin of GLOFs) form are often the biggest challenge. At high altitudes, such as that of Laguna 513, there are large daily temperature fluctuations, long periods of cloudiness, heavy precipitation and high solar radiation as well as a steep topography in what is a remote environment. All of these factors need to be considered in the design and implementation. The GLOF EWS adventurer/scientists had to make
+
+provisions for reduced energy, for complications with data transmission from the sensors and the limited access for sensor installation and frequent following-up and maintenance.
+
+Another crucial element for monitoring and warning, in particular for an EWS in extreme environments such as in this case, is the redundancy in the system. Even in a well-calibrated and tested EWS, a sensor or data transmission failure is likely to occur at some point, sufficient redundancy is indispensable to avoid that sensor failure results in EWS failure as a whole.
+
+An addition problem is funding the long term maintenance of the EWS. Small municipalities with limited budget have other priorities like investing in health and education services.
+
+With the knowledge and information gathered, the local and international team worked together, each contributing their expertise, to design an EWS that would overcome the challenges of Laguna 513. The design comprised two stations – a main station at the Laguna 513 dam and a station in the Pampa Shonquil, which would include meteorological measuring instruments – a data centre in the municipality of Carhuaz, a warning station in the community of Pariacaca, and a repeater station for transferring the signal from the lake to the data centre (Fig. 3).
+
+The stations were equipped with the following instruments:
+
+- Data centre Carhuaz (2 640 m a.s.l.): receiving antenna, screen with real-time data access, server for data storage, infrastructure for launching alarms.
+- Repeater station (3 189 m a.s.l.): receiving and sending antenna.
+- Station Laguna 513 (4 491 m a.s.l.): 2 cameras taking photos every 5 seconds during daylight times, one looking at the face of Mt. Hualcán, one observing the dam. 4 geophones located close to the station, continuously measuring and sending data in 5 second intervals, in order to detect potential mass movements (e.g. ice avalanche) impacting the lake. Receiving and sending antenna and data logger.
+- Station Pampa Shonquil (3 600 m a.s.l.): river discharge station (using pressure sensor), meteorological station with sensors for measuring air temperature and humidity, precipitation, wind speed, and solar radiation. Sending antenna and data logger.
+- Information receiving and warning station at Pariacaca (3 138 m a.s.l.): the monitoring system informs locals about events at Laguna 513 and sirens activated from the Data Centre Carhuaz to facilitate evacuation.
+
+All stations were equipped with solar panels and batteries for energy generation and storage, however energy availability remained a limiting factor, in particular at the glacier lake station as the peaks of the Cordillera Blanca experience a high frequency of cloud coverage. Each station had a mast where most of the instruments were fixed, a concrete lockable box for the electronic equipment, and a protective fence. Emergency power aggregates were available in the municipal building to prevent data losses and interrupted access during blackouts.
+
+The geophones (devices recording ground movements and converting them into voltage) were the principle instruments used for registering a potential GLOF trigger. The back-up cameras could be used to get an overview of the current situation and, particularly during the test phase of the system, for relating geophone measurements to the magnitude of (avalanche) events. The pressure sensor in the riverbed at the Pampa Shonquil station added redundancy to the system and, if calibration measurements were taken, could be used to continuously record runoff. Later, it was planned to install wire sensors in the river channel bed below Laguna 513 that would detect unusually high and dangerous river flow discharge, which could be applied in debris flow warning systems.
+
+A permanently manned hut with wardens next to the station at Pampa Shonquil was an important element of the EWS, especially for consideration of redundancy. Its main purpose was to control the freshwater intake for the municipality of Carhuaz but the location gave the wardens a perfect view towards Laguna 513, they could radio warnings to the authorities in case of an event (as was the case in the 2010 event).
+
+For security, all data is first stored in the data logger at each respective station, then transmitted at 5-second intervals to the data centre server, which has a cloud back-up. All data are directly transferred to a website that permits real-time remote access. In the data centre itself – a separate office in the municipality of Carhuaz – a screen continuously displays the data from this webpage.
+
+Warning protocols represent essential elements of an EWS. The protocol documents and defines warning procedures, typically differentiating a number of warning levels and associated actions as well as the responsible institutions, organizations or committees and people. Local, regional and national laws, rules and guidelines had to be taken into consideration in the Laguna 513 warning protocol. The members of the Local Emergency Operation Centre, civil defense, selected government officials and the mayor, whose authority it is to launch the evacuation alarm, had to be involved. Accordingly, the protocol was accompanied by a list of responsible persons and their phone numbers. It defined three warning levels – yellow, orange and red – plus a normal green baseline level and how these warning levels are reached and what type of actions need to be taken. To this purpose, thresholds of physical variables and processes had to be determined based on sensor measurements. Definition of these thresholds is critical and involves an extended period of calibration and testing, typically of many months, especially if no prior measurements are available as in the case of Laguna 513.
+
+### Dissemination and communication
+
+If measurements on a geophone surpasses a defined threshold, a short message to immediately check EWS data and information is automatically sent to the mobile phones of all the responsible personnel identified in the warning protocol. The subsequent steps to be taken are based on the action plan and on the available data. Alarms cannot be automatically launched by the EWS because, under Peruvian law, only the mayor can authorize an evacuation.
+
+Carhuaz's alarm module has two long-range acoustic sirens and the capacity to send predefined text messages to community and district leaders and stakeholders such as school principals, hospital chiefs, the police and firefighters. Communities upstream of Carhuaz receive warnings and associated information through the Local Emergency Operation Centre and the central authorities of Carhuaz. Pariacaca, which is on the flood pathway, has a warning station with sirens. Furthermore, the EWS protocols were adapted to fit with the Peruvian protocols for risk assessment, allowing communication with the National Emergency Operations Centre at Lima to ask for help (Muñoz et al. 2016).
+
+### Response capability
+
+The ability of people at risk to appropriately respond to the levels of warning issued is possibly the most critical element of an EWS – it is also the most susceptible to failure as the last element of the EWS chain. Failures or errors along the monitoring and warning chain have to be accommodated such that this last element is not adversely affected or threatened.
+
+For the Laguna 513 EWS, information sessions were held with the population at risk. During these, the concept and functionality of the EWS, as well as its potentials and limitations, and clear instructions on actions that have to be taken in case of an alarm were explained and discussed. The instructions include the directive to immediately escape the endangered zones, and a clear indication of the evacuation routes and safety zones. A detailed map with all evacuation routes
+
+was prepared by the civil defense of Carhuaz on the basis of the hazard map developed in the risk knowledge phase of the EWS GLOF design. Emergency simulations are scheduled several times a year for the entire country as Peru's seismic risk is very high. Such simulations, some of them taking place at nighttime, have been used to expose both the population as well as the responsible authorities to a test evacuation und near-realistic conditions, and to familiarize them with the EWS of Laguna 513.
+
+## **Operational aspects and lessons learned**
+
+In 2010, when discussions and activities related to the GLOF EWS started, Carhuaz was the main local actor and the centre for data and information reception. However, the technical, operational and social dimensions of the EWS were beyond the capacity of such a small city. Long-standing national and international expertise – necessitating regular presence on site and permanent joint capacity building and exchange with local people and authorities – was indispensable to address the challenges. In July 2015, full responsibility of the EWS was handed over to the local authorities in a ceremony attended by representatives from the local, provincial and national governments of Peru, from the Swiss government, and from local communities and schools as well as national and international experts. By that time, the EWS had made headlines in the Peruvian, Swiss and international media.
+
+In 2016, much of the central tropical Andes, including the Cordillera Blanca region, was affected by a strong drought. In normal years, after a long dry Austral winter season, farmers count on the start of the rainfall season in October. In 2016, no rainfall was recorded in October and November.
+
+After first requests to remove the EWS by some local inhabitants (cf. Fraser, 2017), farmers got desperate and rumors started to spread that the rain gauges and antennas of the EWS at Laguna 513 were responsible for the lack of rainfall. In a rather dramatic turn of events – driven by community-level power policy factors and weak communications from authorities on the extraordinary meteorological events – a large number of locals gathered at Laguna 513 on 24 November and decided to dismantle the EWS station at the lake. Reactions at the local, national and international levels were vigorous. There was animated disorderly mix of supporters of the EWS on social media. Others expressed incomprehension, disgust, shame and critiqued the voluntarily exposure of lives at risk by this destructive action.
+
+The destruction of the station affected the monitoring and warning components of the EWS from a technical and operational point of view. But service could be maintained thanks to the wardens located at the intermediate site (Pampa Shonquil). Response capabilities and institutional mechanisms were not affected. However, it was crucial to understand the root causes of this action.
+
+The results of intensive research into the incident, which centred on social sciences, are summarized below. The lessons learned are relevant for the development of climate and warning services beyond Peru.
+
+The dismantlement of meteorological and EWS stations by local people is not unique to this site, nor to Peru. Similar incidents have occurred in other regions, such as Himalayas, Andes and Alps of Europe, though those experiences were poorly documented.
+
+Local intra and inter-community conflicts, as well as distrust and biases against the participation of, and installations from, external institutions, can have a strong, but invisible, impact on acceptance.
+
+The relation of local (risk exposed) people to their natural environment and their perceptions of different risks strongly determines their attitude towards risk reduction efforts. Local perspectives
+
+may differ substantially from government or technical and scientific perspectives. For instance, local people can have intimate relations with mountains, glaciers and lakes as places of spirituality and the origin of life. Hence, a GLOF may be understood as a reaction of, for example, a glacier (as a mountain spirit) and a lake (as a being) to human disturbance or inappropriate human behavior. Traditional knowledge and narratives have to be recognized and acknowledged as part of a constructive dialogue and in finding acceptable solutions.
+
+As a consequence, the acquisition of a profound understanding of the social, political and cultural conditions, particularly in terms of power dynamics, is a prerequisite for early warning as well as more generally for climate adaptation service development. It is necessary for collaboration among diverse people, actors and experts, including local populations, physical and social scientists, engineers, local governments, technical governmental institutions, and nongovernmental organization (NGOs). It is encouraged to give the social sciences a more prominent role.
+
+Authorities often believe that an EWS is primarily a technical measuring and data transmission system. The recognition that an EWS also consists of institutional, social, cultural and political components is fundamental because an EWS can only be operational if all components fulfill their function. Furthermore, it is critical that the local authorities and people understand that an EWS cannot reduce risks to zero – its main objective is to avoid harm to human lives. Therefore, it needs to be accompanied by other risk reduction measures, in particular appropriate land-use planning.
+
+## Conclusion
+
+EWS in extreme environments, such as glacier lakes, bring many challenges. The system needs to be carefully designed to achieve robust energy provision, smooth and reliable data transmission, measurement of critical physical variables and the required degree of redundancy. Many months of system calibration are indispensable. Local authorities must clearly understand this. In addition, maintenance of the EWS needs to be budgeted annually by the local authorities to guarantee the sustainability of the system.
+
+The Laguna 513 EWS has become the model for several other EWS in the Peruvian Andes (e.g. Huaraz-Palcacocha, Urubamba-Chicón) and beyond. While the experience and capacity development can be replicated, it is also crucial to acknowledge that every location is an individual case with special characteristics that need appropriate attention.
+
+#

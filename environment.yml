@@ -1,0 +1,40 @@
+name: .venv
+channels:
+  - pytorch
+  - pyg
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.9
+  - pytorch
+  - torchvision
+  - cpuonly
+  - pyg
+  - pytorch-scatter
+  - pytorch-sparse
+  - numpy
+  - pandas
+  - scikit-learn
+  - joblib
+  - geopandas
+  - shapely
+  - rasterio
+  - duckdb
+  - pip
+  - pip:
+    - segmentation-models-pytorch==0.5.0
+    - torch-geometric-temporal==0.56.2
+    - xgboost
+    - shap
+    - earthengine-api
+    - fastapi
+    - uvicorn
+    - pydantic
+    - python-dotenv
+    - huggingface_hub
+    - rank-bm25
+    - faiss-cpu
+    - rdflib
+    - networkx
+    - pyoxigraph
+    - requests

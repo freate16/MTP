@@ -1,0 +1,6 @@
+{
+  "ttl_path": "D:\\Rubel\\M.Tech\\MTP\\Phase 2\\chatbot\\graphrag\\glof_kg_populated_codex.ttl",
+  "store_dir": "D:\\Rubel\\M.Tech\\MTP\\Phase 2\\chatbot\\rag\\kg_store",
+  "format": "turtle",
+  "engine": "pyoxigraph"
+}
